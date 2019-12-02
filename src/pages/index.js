@@ -1,21 +1,75 @@
-import React from "react"
-import { Link } from "gatsby"
+import { gql } from "apollo-boost"
+import { useQuery } from "@apollo/react-hooks"
+import { graphql } from "gatsby"
+import React, { useState } from "react"
 
 import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
 
-const IndexPage = () => (
-  <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link>
-  </Layout>
-)
+// Query for fetching at build-time
+export const query = graphql`
+  {
+    fauna {
+      allProducts {
+        data {
+          _id
+          title
+          description
+        }
+      }
+    }
+  }
+`
+
+// Query for fetching on the client
+const GET_REVIEWS = gql`
+  query GetReviews($productId: ID!) {
+    findProductByID(id: $productId) {
+      reviews {
+        data {
+          _id
+          username
+          text
+        }
+      }
+    }
+  }
+`
+
+const IndexPage = props => {
+  const [productId, setProductId] = useState(null)
+  const { loading, data } = useQuery(GET_REVIEWS, {
+    variables: { productId },
+    skip: !productId,
+  })
+
+  return (
+    <Layout>
+      <ul>
+        {props.data.fauna.allProducts.data.map(product => (
+          <li>
+            <button
+              onClick={() => setProductId(product._id)}
+              disabled={loading}
+            >
+              Get Reviews
+            </button>
+            {product.title} - {product.description}
+            {productId === product._id && data && (
+              <ul>
+                {data.findProductByID.reviews.data.map(
+                  ({ _id, text, username }) => (
+                    <li key={_id}>
+                      {username}: "{text}"
+                    </li>
+                  )
+                )}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </Layout>
+  )
+}
 
 export default IndexPage
