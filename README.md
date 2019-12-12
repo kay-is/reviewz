@@ -1,97 +1,58 @@
-<!-- AUTO-GENERATED-CONTENT:START (STARTER) -->
-<p align="center">
-  <a href="https://www.gatsbyjs.org">
-    <img alt="Gatsby" src="https://www.gatsbyjs.org/monogram.svg" width="60" />
-  </a>
-</p>
-<h1 align="center">
-  Gatsby's default starter
-</h1>
+# Reviewz
 
-Kick off your project with this default boilerplate. This starter ships with the main Gatsby configuration files you might need to get up and running blazing fast with the blazing fast app generator for React.
+This is an example [GatsbyJS application](https://www.gatsbyjs.org/) that demonstrates pre-loading of data at build-time and on-demand loading of data on the client. It uses [FaunaDB as database](https://fauna.com/).
 
-_Have another more specific idea? You may want to check out our vibrant collection of [official and community-created starters](https://www.gatsbyjs.org/docs/gatsby-starters/)._
+[This commit](https://github.com/kay-is/reviewz/commit/40f7173ee78fd4e565390d10411d6a85f781e61b) shows the changes done to a blank GatsbyJS project to connect it to the FaunaDB GraphQL API.
 
-## 🚀 Quick start
+## Prerequisites
 
-1.  **Create a Gatsby site.**
+- Git 2.14.5
+- Node.js 10.15.3
+- NPM 6.4.1
 
-    Use the Gatsby CLI to create a new site, specifying the default starter.
+## Setup
 
-    ```shell
-    # create a new Gatsby site using the default starter
-    gatsby new my-default-starter https://github.com/gatsbyjs/gatsby-starter-default
-    ```
+### 1. Clone and install the Gatsby project
 
-1.  **Start developing.**
+    git clone git@github.com:kay-is/reviewz.git
+    cd reviewz
+    npm i
+    
+### 2. Add an FaunaDB admin key to the `gatsby-config.js` file
 
-    Navigate into your new site’s directory and start it up.
+An admin key for a FaunaDB database named `reviewz` can be created with the following command:
 
-    ```shell
-    cd my-default-starter/
-    gatsby develop
-    ```
+    npx fauna-shell create-key reviewz admin
+    
+Under the `plugins` section in the `gatsby-config.js` file is the config for the `gatsby-source-graphql` plugin.
 
-1.  **Open the source code and start editing!**
+We need to replace the `<ADMIN_KEY>` placeholder with an actual FaunaDB admin key.
 
-    Your site is now running at `http://localhost:8000`!
+### 3. Add an FaunaDB client key to the `gatsby-browser.js` file
 
-    _Note: You'll also see a second link: _`http://localhost:8000/___graphql`_. This is a tool you can use to experiment with querying your data. Learn more about using this tool in the [Gatsby tutorial](https://www.gatsbyjs.org/tutorial/part-five/#introducing-graphiql)._
+The built-in **client** role of FaunaDB doesn't allow read access to indexes, so we need to create a custom role. This can't be done via the Fauna Shell, so we have to do it on the Fauna Dashboard.
 
-    Open the `my-default-starter` directory in your code editor of choice and edit `src/pages/index.js`. Save your changes and the browser will update in real time!
+1. Open https://dashboard.fauna.com/roles/@db/reviewz in a browser
+2. Click on **New Role**
+3. Name the new role **ClientRead**
+4. Add the **Product** and **Review** collections, and the **product_reviews_by_product** and **AllProducts** indexes
+5. Check for all added collections and indexes the **read** permission
+6. Click **Save**
+7. Open https://dashboard.fauna.com/keys/@db/reviewz in a browser
+8. Click **New Key**
+9. Select the **reviewz** database and the **ClientRead** role
+10. Click **Save**
 
-## 🧐 What's inside?
+We need to replace the `<CLIENT KEY>` placeholder in the `gatsby-browser.js` file with the **ClientRead** key we just created.
 
-A quick look at the top-level files and directories you'll see in a Gatsby project.
+### 4. Start the GatsbyJS development server
 
-    .
-    ├── node_modules
-    ├── src
-    ├── .gitignore
-    ├── .prettierrc
-    ├── gatsby-browser.js
-    ├── gatsby-config.js
-    ├── gatsby-node.js
-    ├── gatsby-ssr.js
-    ├── LICENSE
-    ├── package-lock.json
-    ├── package.json
-    └── README.md
+To start a development server we need to run the following command:
 
-1.  **`/node_modules`**: This directory contains all of the modules of code that your project depends on (npm packages) are automatically installed.
+    npm run develop
+    
+### 5. Look at the new website
 
-2.  **`/src`**: This directory will contain all of the code related to what you will see on the front-end of your site (what you see in the browser) such as your site header or a page template. `src` is a convention for “source code”.
+To see the website, we have to open http://localhost:8000 in a browser.
 
-3.  **`.gitignore`**: This file tells git which files it should not track / not maintain a version history for.
-
-4.  **`.prettierrc`**: This is a configuration file for [Prettier](https://prettier.io/). Prettier is a tool to help keep the formatting of your code consistent.
-
-5.  **`gatsby-browser.js`**: This file is where Gatsby expects to find any usage of the [Gatsby browser APIs](https://www.gatsbyjs.org/docs/browser-apis/) (if any). These allow customization/extension of default Gatsby settings affecting the browser.
-
-6.  **`gatsby-config.js`**: This is the main configuration file for a Gatsby site. This is where you can specify information about your site (metadata) like the site title and description, which Gatsby plugins you’d like to include, etc. (Check out the [config docs](https://www.gatsbyjs.org/docs/gatsby-config/) for more detail).
-
-7.  **`gatsby-node.js`**: This file is where Gatsby expects to find any usage of the [Gatsby Node APIs](https://www.gatsbyjs.org/docs/node-apis/) (if any). These allow customization/extension of default Gatsby settings affecting pieces of the site build process.
-
-8.  **`gatsby-ssr.js`**: This file is where Gatsby expects to find any usage of the [Gatsby server-side rendering APIs](https://www.gatsbyjs.org/docs/ssr-apis/) (if any). These allow customization of default Gatsby settings affecting server-side rendering.
-
-9.  **`LICENSE`**: Gatsby is licensed under the MIT license.
-
-10. **`package-lock.json`** (See `package.json` below, first). This is an automatically generated file based on the exact versions of your npm dependencies that were installed for your project. **(You won’t change this file directly).**
-
-11. **`package.json`**: A manifest file for Node.js projects, which includes things like metadata (the project’s name, author, etc). This manifest is how npm knows which packages to install for your project.
-
-12. **`README.md`**: A text file containing useful reference information about your project.
-
-## 🎓 Learning Gatsby
-
-Looking for more guidance? Full documentation for Gatsby lives [on the website](https://www.gatsbyjs.org/). Here are some places to start:
-
-- **For most developers, we recommend starting with our [in-depth tutorial for creating a site with Gatsby](https://www.gatsbyjs.org/tutorial/).** It starts with zero assumptions about your level of ability and walks through every step of the process.
-
-- **To dive straight into code samples, head [to our documentation](https://www.gatsbyjs.org/docs/).** In particular, check out the _Guides_, _API Reference_, and _Advanced Tutorials_ sections in the sidebar.
-
-## 💫 Deploy
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/gatsbyjs/gatsby-starter-default)
-
-<!-- AUTO-GENERATED-CONTENT:END -->
+If we open <http://localhost:8000/__graphql> in a browser, the GatsbyJS development server presents us the GraphiQL UI. In the **Explorer** on the left, we can see the `fauna` GraphQL endpoint we configured in the `gatsby-config.js` file before.
